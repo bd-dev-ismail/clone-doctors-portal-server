@@ -38,6 +38,7 @@ async function run(){
         const appointmentOptionsCollection = client.db("cloneDoctors").collection("appointmentOptions");
         const bookingCollection = client.db("cloneDoctors").collection('bookings'); 
         const usersCollection = client.db("cloneDoctors").collection('users'); 
+        const doctorsCollection = client.db("cloneDoctors").collection('doctors'); 
         app.get("/appointmentOptions", async(req, res)=> {
             const date = req.query.date;
             const query = {};
@@ -54,6 +55,13 @@ async function run(){
             })
             res.send(options)
         });
+        app.get('/bookings/:id', async(req, res)=> {
+          const id = req.params.id;
+          const query = { _id: ObjectId(id) };
+          const result = await bookingCollection.findOne(query);
+          res.send(result)
+          
+        })
         //jwt
         app.get('/jwt', async(req, res)=> {
           const email = req.query.email;
@@ -88,6 +96,18 @@ async function run(){
           const result = await usersCollection.updateOne(filter, updatedDoc, options);
           res.send(result)
         })
+        //tempoaray 
+        // app.get('/addprice', async(req, res)=> {
+        //   const filter = {};
+        //   const options = {upsert: true};
+        //    const updatedDoc = {
+        //      $set: {
+        //        price: 99,
+        //      },
+        //    };
+        //    const result = await appointmentOptionsCollection.updateMany(filter, updatedDoc, options);
+        //    res.send(result);
+        // })
         //save user details
         app.post('/users', async(req, res)=> {
           const user = req.body;
@@ -165,6 +185,27 @@ async function run(){
             ]).toArray();
             res.send(options)
         });
+        app.get('/appointmentSpeciality', async(req, res)=> {
+          const query = {};
+          const result = await appointmentOptionsCollection.find(query).project({name: 1}).toArray();
+          res.send(result);
+        });
+        app.get('/doctors' ,async(req, res)=> {
+          const query = {};
+          const result = await doctorsCollection.find(query).toArray();
+          res.send(result);
+        })
+        app.post('/doctors', async(req, res)=>{
+          const doctor = req.body;
+          const result = await doctorsCollection.insertOne(doctor);
+          res.send(result);
+        });
+        app.delete('/doctors/:id', async(req, res)=> {
+          const id = req.params.id;
+          const filter = {_id: ObjectId(id)};
+          const result = await doctorsCollection.deleteOne(filter);
+          res.send(result);
+        })
     }
     finally{
 
